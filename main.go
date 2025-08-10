@@ -40,7 +40,7 @@ func main() {
 	}
 
 	// Setup signal handling
-	setupSignalHandler(bridge)
+	setupSignalHandler()
 
 	// Start the bridge
 	debugMain("Starting OSC-MIDI bridge on port %d", *oscPort)
@@ -55,14 +55,13 @@ func main() {
 	}
 }
 
-func setupSignalHandler(bridge *Bridge) {
+func setupSignalHandler() {
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
 
 	go func() {
 		<-sigChan
-		debugMain("Received shutdown signal")
-		bridge.Cleanup()
+		fmt.Println("Received SIGTERM, exiting.")
 		os.Exit(0)
 	}()
 }
