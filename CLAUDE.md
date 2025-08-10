@@ -7,6 +7,7 @@
 
 ## Also
 - Write the minimum code necessary to achieve the goal
+- Add debug logging (with debuggo) for important steps.
 - Keep implementations simple and focused
 - Before marking task as complete:
 - Run unit tests: `make test`
