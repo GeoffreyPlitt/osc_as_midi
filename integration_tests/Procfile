@@ -1,0 +1,4 @@
+jackd: ./start_jackd.sh
+bridge: ./start_bridge.sh
+mididump: ./start_mididump.sh
+osc_sender: ./send_osc_messages.sh

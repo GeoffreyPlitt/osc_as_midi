@@ -7,6 +7,9 @@ RUN apt-get update && apt-get install -y \
     liblo-tools \
     jack-tools \
     bsdmainutils \
+    python3 \
+    python3-pip \
+    && pip3 install --break-system-packages honcho \
     && rm -rf /var/lib/apt/lists/*
 
 # Set JACK environment variable to prevent audio reservation issues
