@@ -15,7 +15,7 @@ test: docker-build
 
 .PHONY: integration-test
 integration-test: build
-	docker run --rm -v $(PWD):/app $(DOCKER_IMAGE) bash integration_test.sh
+	docker run --rm --privileged --ulimit memlock=-1:-1 --shm-size=512m -v $(PWD):/app $(DOCKER_IMAGE) bash integration_test.sh
 
 .PHONY: dev
 dev: docker-build
