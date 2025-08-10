@@ -5,9 +5,9 @@
 2. **Understand the project structure** - This is an OSC-to-MIDI bridge written in Go with Docker-based development
 
 
-## Also
+## Remember
+- You cannot fetch/curl to read github repos, use the `gh` command instead. Instead of fetching or cloning the repo, use `gh api repos/.../.../contents` to view contents, etc.
 - Write the minimum code necessary to achieve the goal
-- Add debug logging (with debuggo) for important steps.
 - Keep implementations simple and focused
 - Before marking task as complete:
 - Run unit tests: `make test`
@@ -18,7 +18,6 @@
 - Testing:
   - Unit tests: `make test` - Must pass for all code changes
   - Integration tests: `make integration-test` - For end-to-end validation
-- You cannot fetch/curl to read github repos, use the `gh` command instead.
 
 ## Key Commands
 ```bash

@@ -19,11 +19,22 @@ integration-test: build
 
 .PHONY: dev
 dev: docker-build
-	docker run --rm -it --name $(CONTAINER) -v $(PWD):/app -v ~/go/pkg/mod:/go/pkg/mod -p 9000:9000 $(DOCKER_IMAGE) /bin/bash
+	docker run --rm -it --name $(CONTAINER) \
+		-v $(PWD):/app \
+		-v ~/go/pkg/mod:/go/pkg/mod \
+		-p 9000:9000 \
+		-e DEBUG=$(DEBUG) \
+		$(DOCKER_IMAGE) \
+		bash -c "jackd -d dummy -r 48000 -p 64 & sleep 1 && bash"
 
 .PHONY: run
 run: build
-	docker run --rm -it -v $(PWD):/app -p 9000:9000 --device /dev/snd $(DOCKER_IMAGE) ./osc-midi-bridge $(ARGS)
+	docker run --rm -it \
+		-v $(PWD):/app \
+		-p 9000:9000 \
+		-e DEBUG=$(DEBUG) \
+		$(DOCKER_IMAGE) \
+		bash -c "jackd -d dummy -r 48000 -p 64 & sleep 1 && ./osc-midi-bridge $(ARGS)"
 
 .PHONY: shell
 shell:

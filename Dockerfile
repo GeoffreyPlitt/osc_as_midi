@@ -1,11 +1,14 @@
 FROM golang:1.22-bookworm
 
-# Install ALSA development libraries and tools
+# Install JACK development libraries and tools
 RUN apt-get update && apt-get install -y \
-    libasound2-dev \
-    alsa-utils \
+    jackd2 \
+    libjack-jackd2-dev \
     liblo-tools \
     && rm -rf /var/lib/apt/lists/*
+
+# Set JACK environment variable to prevent audio reservation issues
+ENV JACK_NO_AUDIO_RESERVATION=1
 
 # Set working directory
 WORKDIR /app

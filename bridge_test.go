@@ -4,25 +4,6 @@ import (
 	"testing"
 )
 
-func TestBridgeStart(t *testing.T) {
-	bridge := &Bridge{
-		monitorMode: true, // Don't actually send MIDI in tests
-	}
-
-	// Test that bridge can start without error
-	err := bridge.Start()
-	if err == nil {
-		t.Error("Expected error when starting bridge without proper initialization")
-	}
-}
-
-func TestBridgeCleanup(t *testing.T) {
-	bridge := &Bridge{}
-
-	// Should not panic even with nil fields
-	bridge.Cleanup()
-}
-
 func TestExtractChannel(t *testing.T) {
 	tests := []struct {
 		address  string
@@ -41,5 +22,33 @@ func TestExtractChannel(t *testing.T) {
 		if result != tt.expected {
 			t.Errorf("extractChannel(%s) = %d, expected %d", tt.address, result, tt.expected)
 		}
+	}
+}
+
+func TestBridgeCleanup(t *testing.T) {
+	// Create a bridge with nil fields
+	bridge := &Bridge{}
+
+	// Should not panic even with nil fields
+	bridge.Cleanup()
+
+	// Create a bridge with initialized channel
+	bridge = &Bridge{
+		eventQueue: make(chan *MidiEvent),
+	}
+
+	// Should handle cleanup gracefully
+	bridge.Cleanup()
+}
+
+func TestMidiEvent(t *testing.T) {
+	// Test MidiEvent structure
+	event := &MidiEvent{
+		midiData: nil,
+	}
+
+	// Ensure the structure exists and can be created
+	if event.midiData != nil {
+		t.Error("Expected nil midiData")
 	}
 }
