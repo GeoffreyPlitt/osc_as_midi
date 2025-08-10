@@ -1,7 +1,7 @@
 package main
 
 import (
-	"strings"
+	_ "strings"
 
 	"github.com/hypebeast/go-osc/osc"
 )

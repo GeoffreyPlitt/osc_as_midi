@@ -1,10 +1,10 @@
 package main
 
 import (
-	"flag"
-	"os"
-	"os/signal"
-	"syscall"
+	_ "flag"
+	_ "os"
+	_ "os/signal"
+	_ "syscall"
 )
 
 func main() {

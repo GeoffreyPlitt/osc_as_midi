@@ -7,6 +7,7 @@
 *.dll
 *.so
 *.dylib
+osc-midi-bridge
 
 # Test binary, built with `go test -c`
 *.test

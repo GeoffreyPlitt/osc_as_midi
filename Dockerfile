@@ -1,4 +1,4 @@
-FROM golang:1.21-bookworm
+FROM golang:1.22-bookworm
 
 # Install ALSA development libraries and tools
 RUN apt-get update && apt-get install -y \
@@ -20,6 +20,7 @@ COPY . .
 
 # Build the application
 RUN if [ -f go.mod ]; then \
+        go mod tidy && \
         go build -o osc-midi-bridge; \
     fi
 

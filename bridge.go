@@ -1,17 +1,17 @@
 package main
 
 import (
-	"github.com/GeoffreyPlitt/debuggo"
+	_ "github.com/GeoffreyPlitt/debuggo"
 	"github.com/hypebeast/go-osc/osc"
-	"gitlab.com/gomidi/midi/v2"
-	"gitlab.com/gomidi/midi/v2/drivers/rtmididrv"
+	"gitlab.com/gomidi/midi/v2/drivers"
+	_ "gitlab.com/gomidi/midi/v2/drivers/rtmididrv"
 )
 
 type Bridge struct {
 	oscServer   *osc.Server
-	midiDriver  midi.Driver
-	midiOut     midi.Out
-	debug       *debuggo.Debug
+	midiDriver  drivers.Driver
+	midiOut     drivers.Out
+	debug       func(format string, args ...interface{})
 	monitorMode bool
 }
 
