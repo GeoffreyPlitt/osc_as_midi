@@ -1,7 +1,8 @@
 package main
 
 import (
-	_ "strings"
+	"strconv"
+	"strings"
 
 	"github.com/hypebeast/go-osc/osc"
 )
@@ -15,7 +16,13 @@ func (b *Bridge) handleNoteOff(msg *osc.Message) {
 }
 
 func (b *Bridge) extractChannel(address string) uint8 {
-	// TODO: Implementation
+	parts := strings.Split(address, "/")
+	if len(parts) >= 3 && parts[1] == "midi" {
+		ch, err := strconv.Atoi(parts[2])
+		if err == nil && ch >= 0 && ch <= 15 {
+			return uint8(ch)
+		}
+	}
 	return 0
 }
 

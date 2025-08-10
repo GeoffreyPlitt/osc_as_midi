@@ -16,7 +16,7 @@ A Go program that:
 - `github.com/hypebeast/go-osc/osc` - Pure Go OSC implementation
 - `gitlab.com/gomidi/midi/v2` - MIDI library
 - `gitlab.com/gomidi/midi/v2/drivers/rtmididrv` - Virtual port creation
-- `github.com/GeoffreyPlitt/debuggo` - Debug logging
+- `github.com/GeoffreyPlitt/debuggo` - Debug logging (controlled via DEBUG env var)
 - System dependency: `libasound2-dev` (for ALSA)
 
 ## CLI Interface
@@ -29,8 +29,7 @@ A Go program that:
 ./osc-midi-bridge \
   --osc-port 8000 \
   --midi-name "MyController" \
-  --osc-pattern "/control/{channel}/{type}" \
-  --debug
+  --osc-pattern "/control/{channel}/{type}"
 
 # List available MIDI ports
 ./osc-midi-bridge --list-ports
@@ -70,7 +69,7 @@ make dev
 
 # Run the application
 make run
-make run ARGS="--debug --osc-port 8000"
+make run ARGS="--osc-port 8000"
 
 # Clean up
 make clean
@@ -113,7 +112,10 @@ go mod download
 go build -o osc-midi-bridge
 
 # Run
-./osc-midi-bridge --debug
+./osc-midi-bridge
+
+# Run with debug output
+DEBUG=* ./osc-midi-bridge
 ```
 
 ## Example Usage Scenarios
@@ -121,6 +123,12 @@ go build -o osc-midi-bridge
 ```bash
 # Basic usage with defaults
 ./osc-midi-bridge
+
+# With debug output enabled
+DEBUG=* ./osc-midi-bridge
+
+# Enable debug for specific modules
+DEBUG=osc-midi-bridge:* ./osc-midi-bridge
 
 # Custom port and name
 ./osc-midi-bridge --osc-port 8000 --midi-name "OSC Controller"

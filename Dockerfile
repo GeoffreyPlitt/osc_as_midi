@@ -25,5 +25,5 @@ RUN if [ -f go.mod ]; then \
         go build -o osc-midi-bridge; \
     fi
 
-# Default command
-CMD ["./osc-midi-bridge", "--debug"]
+# Default command (use DEBUG env var for debug output)
+CMD ["./osc-midi-bridge"]

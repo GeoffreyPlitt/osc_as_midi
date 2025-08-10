@@ -14,7 +14,7 @@ echo "oscsend tool found, proceeding with tests..."
 
 # Start the bridge in background
 echo "Starting bridge..."
-./osc-midi-bridge --debug &
+DEBUG=* ./osc-midi-bridge &
 BRIDGE_PID=$!
 
 # Wait for bridge to start
