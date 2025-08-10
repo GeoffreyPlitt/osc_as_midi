@@ -3,10 +3,10 @@
 ## Architecture Overview
 
 A Go program that:
-1. **Creates virtual ALSA MIDI ports** using gomidi/rtmididrv
+1. **Creates virtual JACK MIDI ports** using go-jack
 2. **Listens for OSC messages** on configurable UDP port
 3. **Translates OSC to MIDI** with flexible path patterns
-4. **Emits MIDI events** through the virtual port
+4. **Emits MIDI events** through the virtual port with ultra-low latency (1.33ms)
 5. **Logs debug info** using debuggo
 6. **Gracefully cleans up** on shutdown
 
@@ -14,10 +14,16 @@ A Go program that:
 
 **Libraries Used:**
 - `github.com/hypebeast/go-osc/osc` - Pure Go OSC implementation
-- `gitlab.com/gomidi/midi/v2` - MIDI library
-- `gitlab.com/gomidi/midi/v2/drivers/rtmididrv` - Virtual port creation
+- `github.com/xthexder/go-jack` - JACK Audio Connection Kit bindings
 - `github.com/GeoffreyPlitt/debuggo` - Debug logging (controlled via DEBUG env var)
-- System dependency: `libasound2-dev` (for ALSA)
+- System dependency: `jackd2` and `libjack-jackd2-dev` (for JACK)
+
+## Performance
+
+- **Ultra-low latency**: 1.33ms with 64 frame buffer @ 48kHz
+- **Lock-free design**: Single producer/consumer event queue
+- **Batch processing**: Up to 32 MIDI events per JACK cycle
+- **No scheduling overhead**: Direct dispatch in real-time callback
 
 ## CLI Interface
 
@@ -28,31 +34,39 @@ A Go program that:
 # With options
 ./osc-midi-bridge \
   --osc-port 8000 \
-  --midi-name "MyController" \
-  --osc-pattern "/control/{channel}/{type}"
+  --client-name "MyController" \
+  --port-name "midi_out" \
+  --buffer-size 64
 
 # List available MIDI ports
 ./osc-midi-bridge --list-ports
 ```
 
 **CLI Flags:**
-```go
-flag.IntVar(&oscPort, "osc-port", 9000, "UDP port to listen for OSC messages")
-flag.StringVar(&midiName, "midi-name", "Virtual MIDI", "Name of virtual MIDI port")
-flag.BoolVar(&listPorts, "list-ports", false, "List available MIDI ports and exit")
+```
+--osc-port      UDP port for OSC messages (default: 9000)
+--client-name   JACK client name (default: "osc-midi-bridge")
+--port-name     JACK MIDI output port name (default: "midi_out")
+--buffer-size   JACK buffer size in frames (default: 64 = 1.3ms @ 48kHz)
+--list-ports    List available MIDI ports and exit
 ```
 
 ## OSC Message Format
-- Hardcoded format: `/midi/{channel}/{type}` 
-- We can expand to make it configurable in the future.
 
-**Message Types:**
+**Supported paths:**
 - `/midi/{channel}/note_on` - args: [note(int), velocity(int)]
 - `/midi/{channel}/note_off` - args: [note(int), velocity(int)]
 
+Where `{channel}` is 0-15 for MIDI channels 1-16.
+
+**Example messages:**
+- `/midi/0/note_on 60 127` - Middle C, channel 1, full velocity
+- `/midi/9/note_on 36 100` - Kick drum, channel 10
+- `/midi/0/note_off 60 0` - Middle C off, channel 1
+
 ## Development with Docker
 
-For cross-platform development (especially on macOS), use the provided Makefile:
+The project uses Docker for cross-platform development, especially useful on macOS where JACK requires special setup. The Docker container runs JACK with a dummy driver for development.
 
 ```bash
 # Build the binary
@@ -63,6 +77,9 @@ make fmt
 
 # Run go vet
 make vet
+
+# Run unit tests
+make test
 
 # Start interactive development container
 make dev
@@ -102,8 +119,8 @@ The integration test script:
 ## Build Instructions (Linux)
 
 ```bash
-# Install ALSA dev headers
-sudo apt-get install libasound2-dev
+# Install JACK development headers
+sudo apt-get install jackd2 libjack-jackd2-dev
 
 # Get dependencies
 go mod download
@@ -111,11 +128,30 @@ go mod download
 # Build
 go build -o osc-midi-bridge
 
+# Start JACK (if not already running)
+jackd -d alsa -r 48000 -p 64  # For real hardware
+# OR
+jackd -d dummy -r 48000 -p 64  # For testing without hardware
+
 # Run
 ./osc-midi-bridge
 
 # Run with debug output
 DEBUG=* ./osc-midi-bridge
+DEBUG=* ./osc-midi-bridge
+```
+
+## Docker Usage
+
+The Docker setup automatically handles JACK configuration:
+
+```bash
+# Build and run with Docker
+make run
+
+# This starts JACK with dummy driver and runs the bridge
+# Equivalent to:
+# docker run ... bash -c "jackd -d dummy -r 48000 -p 64 & sleep 1 && ./osc-midi-bridge"
 ```
 
 ## Example Usage Scenarios
@@ -128,11 +164,72 @@ DEBUG=* ./osc-midi-bridge
 DEBUG=* ./osc-midi-bridge
 
 # Enable debug for specific modules
-DEBUG=osc-midi-bridge:* ./osc-midi-bridge
+DEBUG=handlers ./osc-midi-bridge
+DEBUG=bridge,main ./osc-midi-bridge
 
-# Custom port and name
-./osc-midi-bridge --osc-port 8000 --midi-name "OSC Controller"
+# Custom port and names
+./osc-midi-bridge --osc-port 8000 --client-name "OSC Controller" --port-name "osc_out"
+
+# Ultra-low latency (0.67ms @ 48kHz)
+jackd -d dummy -r 48000 -p 32 &
+./osc-midi-bridge --buffer-size 32
 
 # List available MIDI ports
 ./osc-midi-bridge --list-ports
 ```
+
+## Connecting to Other Applications
+
+Once running, the bridge creates a JACK MIDI output port that can be connected to any JACK-aware application:
+
+```bash
+# List all JACK connections
+jack_lsp -c
+
+# Connect to a software synthesizer
+jack_connect midi_out yoshimi:midi_in
+
+# Monitor MIDI output
+jack_midi_dump midi_out
+```
+
+## Sending OSC Messages
+
+You can send OSC messages using any OSC client. For testing, use `oscsend`:
+
+```bash
+# Send middle C note on
+oscsend localhost 9000 /midi/0/note_on ii 60 127
+
+# Send middle C note off
+oscsend localhost 9000 /midi/0/note_off ii 60 0
+
+# Send a chord
+oscsend localhost 9000 /midi/0/note_on ii 60 100 &
+oscsend localhost 9000 /midi/0/note_on ii 64 100 &
+oscsend localhost 9000 /midi/0/note_on ii 67 100 &
+```
+
+## Architecture Details
+
+### Event Flow
+```
+OSC Client → UDP:9000 → OSC Server → Event Queue → JACK Process Callback → JACK MIDI Port
+                                          ↓
+                                    (Lock-free FIFO)
+                                    1024 event buffer
+```
+
+### Real-time Considerations
+- JACK process callback runs in real-time context
+- Lock-free event queue prevents priority inversion
+- Batch processing limits per-cycle CPU usage
+- Pre-allocated buffers minimize allocations
+
+### Debug Logging
+The bridge uses hierarchical debug namespaces:
+- `main` - Main program flow
+- `bridge` - JACK client and MIDI operations
+- `handlers` - OSC message handling
+
+Enable specific namespaces with the DEBUG environment variable.

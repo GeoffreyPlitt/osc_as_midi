@@ -11,7 +11,7 @@ import (
 	"github.com/GeoffreyPlitt/debuggo"
 )
 
-var debugMain = debuggo.Debug("osc-midi-bridge:main")
+var debugMain = debuggo.Debug("main")
 
 func main() {
 	// Command-line flags

@@ -9,7 +9,7 @@ import (
 	"github.com/xthexder/go-jack"
 )
 
-var debugBridge = debuggo.Debug("osc-midi-bridge:bridge")
+var debugBridge = debuggo.Debug("bridge")
 
 type MidiEvent struct {
 	midiData *jack.MidiData
@@ -102,7 +102,7 @@ func (b *Bridge) process(nframes uint32) int {
 		case event := <-b.eventQueue:
 			event.midiData.Time = 0 // Immediate dispatch
 			if err := b.midiOutPort.MidiEventWrite(event.midiData, buffer); err != 0 {
-				debugBridge("Failed to write MIDI event: %v", err)
+				fmt.Printf("WARNING:Failed to write MIDI event: %v", err)
 			}
 			processed++
 		default:
@@ -111,7 +111,7 @@ func (b *Bridge) process(nframes uint32) int {
 	}
 
 	if processed == 32 {
-		debugBridge("Warning: MIDI queue overflow, processed 32 events")
+		fmt.Printf("WARNING: MIDI queue overflow, processed 32 events")
 	}
 
 	return 0

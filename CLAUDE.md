@@ -31,9 +31,5 @@ make dev             # Start development container
 
 ### Important Notes
 - All development happens inside Docker containers (see Makefile)
-- The project uses ALSA for MIDI on Linux, hence Docker is required on macOS
+- The project uses JACK for MIDI on Linux, hence Docker is required on macOS
 - Signal handling (SIGTERM/SIGINT) is implemented for graceful shutdown
-- Debug logging uses the debuggo library with DEBUG environment variable (not --debug flag)
-  - Enable all debug output: `DEBUG=*`
-  - Enable specific modules: `DEBUG=osc-midi-bridge:*`
-- You cannot fetch/curl to read github repos, use the `gh` command instead

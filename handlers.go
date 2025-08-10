@@ -11,7 +11,7 @@ import (
 	"github.com/xthexder/go-jack"
 )
 
-var debugHandlers = debuggo.Debug("osc-midi-bridge:handlers")
+var debugHandlers = debuggo.Debug("handlers")
 
 func (b *Bridge) handleNoteOn(msg *osc.Message) error {
 	if len(msg.Arguments) < 2 {
@@ -36,7 +36,7 @@ func (b *Bridge) handleNoteOn(msg *osc.Message) error {
 			Buffer: midiBytes,
 		},
 	}:
-		debugHandlers("note-on ch:%d note:%d vel:%d", channel, note, velocity)
+		fmt.Printf("NOTE-ON ch:%d note:%d vel:%d", channel, note, velocity)
 	default:
 		return errors.New("MIDI queue full")
 	}
@@ -67,7 +67,7 @@ func (b *Bridge) handleNoteOff(msg *osc.Message) error {
 			Buffer: midiBytes,
 		},
 	}:
-		debugHandlers("note-off ch:%d note:%d vel:%d", channel, note, velocity)
+		fmt.Printf("NOTE-OFF ch:%d note:%d vel:%d", channel, note, velocity)
 	default:
 		return errors.New("MIDI queue full")
 	}
