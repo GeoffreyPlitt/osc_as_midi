@@ -16,13 +16,17 @@ type MidiEvent struct {
 }
 
 type Bridge struct {
-	oscServer   *osc.Server
-	jackClient  *jack.Client
-	midiOutPort *jack.Port
-	eventQueue  chan *MidiEvent
+	oscServer     *osc.Server
+	jackClient    *jack.Client
+	midiOutPort   *jack.Port
+	midiInPort    *jack.Port
+	eventQueue    chan *MidiEvent
+	oscOutQueue   chan *osc.Message
+	oscTargetHost string
+	oscTargetPort int
 }
 
-func NewBridge(oscPort int, clientName string, portName string) (*Bridge, error) {
+func NewBridge(oscPort int, clientName string, portName string, oscTargetHost string, oscTargetPort int) (*Bridge, error) {
 	// Create OSC server with dispatcher
 	dispatcher := osc.NewStandardDispatcher()
 	server := &osc.Server{
@@ -37,17 +41,28 @@ func NewBridge(oscPort int, clientName string, portName string) (*Bridge, error)
 	}
 
 	// Create MIDI output port
-	midiPort := client.PortRegister(portName, jack.DEFAULT_MIDI_TYPE, jack.PortIsOutput, 0)
-	if midiPort == nil {
+	midiOutPort := client.PortRegister(portName, jack.DEFAULT_MIDI_TYPE, jack.PortIsOutput, 0)
+	if midiOutPort == nil {
 		client.Close()
 		return nil, errors.New("failed to create MIDI output port")
 	}
 
+	// Create MIDI input port
+	midiInPort := client.PortRegister("midi_in", jack.DEFAULT_MIDI_TYPE, jack.PortIsInput, 0)
+	if midiInPort == nil {
+		client.Close()
+		return nil, errors.New("failed to create MIDI input port")
+	}
+
 	b := &Bridge{
-		oscServer:   server,
-		jackClient:  client,
-		midiOutPort: midiPort,
-		eventQueue:  make(chan *MidiEvent, 1024), // Pre-allocated queue
+		oscServer:     server,
+		jackClient:    client,
+		midiOutPort:   midiOutPort,
+		midiInPort:    midiInPort,
+		eventQueue:    make(chan *MidiEvent, 1024), // Pre-allocated queue
+		oscOutQueue:   make(chan *osc.Message, 16), // OSC output queue
+		oscTargetHost: oscTargetHost,
+		oscTargetPort: oscTargetPort,
 	}
 
 	// Set up process callback
@@ -58,6 +73,9 @@ func NewBridge(oscPort int, clientName string, portName string) (*Bridge, error)
 
 	// Set up OSC handlers
 	b.setupOSCHandlers()
+
+	// Start OSC sender goroutine
+	b.startOSCSender()
 
 	return b, nil
 }
@@ -88,15 +106,22 @@ func (b *Bridge) Cleanup() {
 		b.jackClient.Close()
 	}
 
-	// Don't close the channel if it's already nil or closed
+	// Close OSC output queue to signal sender goroutine to exit
+	if b.oscOutQueue != nil {
+		close(b.oscOutQueue)
+	}
+
+	// Don't close the eventQueue channel if it's already nil or closed
 	// The channel will be garbage collected when the Bridge is freed
 }
 
 // JACK process callback - called by JACK in real-time thread
 func (b *Bridge) process(nframes uint32) int {
+	// Handle outgoing MIDI (OSC → MIDI)
 	buffer := b.midiOutPort.MidiClearBuffer(nframes)
 
 	processed := 0
+outgoingLoop:
 	for processed < 32 { // Process max 32 events per cycle
 		select {
 		case event := <-b.eventQueue:
@@ -106,7 +131,7 @@ func (b *Bridge) process(nframes uint32) int {
 			}
 			processed++
 		default:
-			return 0
+			break outgoingLoop
 		}
 	}
 
@@ -114,7 +139,61 @@ func (b *Bridge) process(nframes uint32) int {
 		debugBridge("MIDI queue overflow, processed 32 events")
 	}
 
+	// Handle incoming MIDI (MIDI → OSC)
+	incomingEvents := b.midiInPort.GetMidiEvents(nframes)
+	for _, event := range incomingEvents {
+		if oscMsg := b.parseIncomingMIDI(event); oscMsg != nil {
+			select {
+			case b.oscOutQueue <- oscMsg:
+				// Message queued successfully
+			default:
+				// Buffer full - drop message (no blocking in RT callback)
+				debugBridge("OSC output queue full, dropping message")
+			}
+		}
+	}
+
 	return 0
+}
+
+// Start OSC sender goroutine
+func (b *Bridge) startOSCSender() {
+	go func() {
+		client := osc.NewClient(b.oscTargetHost, b.oscTargetPort)
+		for msg := range b.oscOutQueue {
+			if err := client.Send(msg); err != nil {
+				fmt.Printf("WARNING: Failed to send OSC message %s: %v\n", msg.Address, err)
+			}
+		}
+	}()
+}
+
+// Parse incoming MIDI event to OSC message
+func (b *Bridge) parseIncomingMIDI(event *jack.MidiData) *osc.Message {
+	if len(event.Buffer) < 3 {
+		return nil // Invalid MIDI message
+	}
+
+	status := event.Buffer[0] & 0xF0
+	channel := event.Buffer[0] & 0x0F
+	note := event.Buffer[1] & 0x7F
+	velocity := event.Buffer[2] & 0x7F
+
+	var path string
+	switch status {
+	case 0x90: // Note On
+		if velocity == 0 {
+			path = fmt.Sprintf("/midi/%d/note_off", channel)
+		} else {
+			path = fmt.Sprintf("/midi/%d/note_on", channel)
+		}
+	case 0x80: // Note Off
+		path = fmt.Sprintf("/midi/%d/note_off", channel)
+	default:
+		return nil // Only handle note messages
+	}
+
+	return osc.NewMessage(path, int32(note), int32(velocity))
 }
 
 // List available JACK MIDI ports

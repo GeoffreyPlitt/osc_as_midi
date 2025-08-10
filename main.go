@@ -16,10 +16,12 @@ var debugMain = debuggo.Debug("main")
 func main() {
 	// Command-line flags
 	var (
-		oscPort    = flag.Int("osc-port", 9000, "UDP port for OSC messages")
-		clientName = flag.String("client-name", "osc-midi-bridge", "JACK client name")
-		portName   = flag.String("port-name", "midi_out", "JACK MIDI output port name")
-		listPorts  = flag.Bool("list-ports", false, "List available MIDI ports and exit")
+		oscPort       = flag.Int("osc-port", 9000, "UDP port for OSC messages")
+		clientName    = flag.String("client-name", "osc-midi-bridge", "JACK client name")
+		portName      = flag.String("port-name", "midi_out", "JACK MIDI output port name")
+		listPorts     = flag.Bool("list-ports", false, "List available MIDI ports and exit")
+		oscTargetHost = flag.String("osc-target-host", "localhost", "Target host for outgoing OSC messages")
+		oscTargetPort = flag.Int("osc-target-port", 8000, "Target port for outgoing OSC messages")
 	)
 
 	flag.Parse()
@@ -33,7 +35,7 @@ func main() {
 	}
 
 	// Create bridge instance
-	bridge, err := NewBridge(*oscPort, *clientName, *portName)
+	bridge, err := NewBridge(*oscPort, *clientName, *portName, *oscTargetHost, *oscTargetPort)
 	if err != nil {
 		log.Fatal(err)
 	}
