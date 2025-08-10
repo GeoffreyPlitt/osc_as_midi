@@ -4,6 +4,7 @@ FROM golang:1.22-bookworm
 RUN apt-get update && apt-get install -y \
     libasound2-dev \
     alsa-utils \
+    liblo-tools \
     && rm -rf /var/lib/apt/lists/*
 
 # Set working directory

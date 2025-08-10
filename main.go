@@ -2,11 +2,29 @@ package main
 
 import (
 	_ "flag"
-	_ "os"
-	_ "os/signal"
-	_ "syscall"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 func main() {
-	// TODO: Implementation
+	// Create bridge instance
+	bridge := &Bridge{}
+
+	// Setup signal handling
+	setupSignalHandler(bridge)
+
+	// TODO: Parse flags and start bridge
+}
+
+func setupSignalHandler(bridge *Bridge) {
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+
+	go func() {
+		<-sigChan
+		// TODO: Add debug logging when implemented
+		bridge.Cleanup()
+		os.Exit(0)
+	}()
 }

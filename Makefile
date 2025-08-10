@@ -13,6 +13,10 @@ build: docker-build
 test: docker-build
 	docker run --rm -v $(PWD):/app -v ~/go/pkg/mod:/go/pkg/mod $(DOCKER_IMAGE) go test -v -cover ./...
 
+.PHONY: integration-test
+integration-test: build
+	docker run --rm -v $(PWD):/app --device /dev/snd $(DOCKER_IMAGE) bash integration_test.sh
+
 .PHONY: dev
 dev: docker-build
 	docker run --rm -it --name $(CONTAINER) -v $(PWD):/app -v ~/go/pkg/mod:/go/pkg/mod -p 9000:9000 $(DOCKER_IMAGE) /bin/bash
