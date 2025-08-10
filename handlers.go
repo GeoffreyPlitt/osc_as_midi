@@ -36,7 +36,7 @@ func (b *Bridge) handleNoteOn(msg *osc.Message) error {
 			Buffer: midiBytes,
 		},
 	}:
-		fmt.Printf("NOTE-ON ch:%d note:%d vel:%d", channel, note, velocity)
+		fmt.Printf("NOTE-ON ch:%d note:%d vel:%d\n", channel, note, velocity)
 	default:
 		return errors.New("MIDI queue full")
 	}
@@ -67,7 +67,7 @@ func (b *Bridge) handleNoteOff(msg *osc.Message) error {
 			Buffer: midiBytes,
 		},
 	}:
-		fmt.Printf("NOTE-OFF ch:%d note:%d vel:%d", channel, note, velocity)
+		fmt.Printf("NOTE-OFF ch:%d note:%d vel:%d\n", channel, note, velocity)
 	default:
 		return errors.New("MIDI queue full")
 	}
