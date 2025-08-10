@@ -59,9 +59,6 @@ For cross-platform development (especially on macOS), use the provided Makefile:
 # Build the binary
 make build
 
-# Run tests
-make test
-
 # Format code
 make fmt
 
@@ -78,6 +75,30 @@ make run ARGS="--debug --osc-port 8000"
 # Clean up
 make clean
 ```
+
+## Testing
+
+### Unit Tests
+
+Run the Go unit tests with coverage:
+
+```bash
+make test
+```
+
+### Integration Tests
+
+Integration tests verify the OSC message handling and signal processing:
+
+```bash
+make integration-test
+```
+
+The integration test script:
+- Verifies the bridge starts correctly
+- Sends test OSC messages using `oscsend`
+- Tests graceful shutdown with SIGTERM
+- Validates the test tooling is properly configured
 
 ## Build Instructions (Linux)
 

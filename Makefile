@@ -15,7 +15,7 @@ test: docker-build
 
 .PHONY: integration-test
 integration-test: build
-	docker run --rm -v $(PWD):/app --device /dev/snd $(DOCKER_IMAGE) bash integration_test.sh
+	docker run --rm -v $(PWD):/app $(DOCKER_IMAGE) bash integration_test.sh
 
 .PHONY: dev
 dev: docker-build
