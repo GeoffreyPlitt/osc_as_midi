@@ -51,18 +51,42 @@ flag.BoolVar(&listPorts, "list-ports", false, "List available MIDI ports and exi
 - `/midi/{channel}/note_on` - args: [note(int), velocity(int)]
 - `/midi/{channel}/note_off` - args: [note(int), velocity(int)]
 
-## Build Instructions
+## Development with Docker
+
+For cross-platform development (especially on macOS), use the provided Makefile:
+
+```bash
+# Build the binary
+make build
+
+# Run tests
+make test
+
+# Format code
+make fmt
+
+# Run go vet
+make vet
+
+# Start interactive development container
+make dev
+
+# Run the application
+make run
+make run ARGS="--debug --osc-port 8000"
+
+# Clean up
+make clean
+```
+
+## Build Instructions (Linux)
 
 ```bash
 # Install ALSA dev headers
 sudo apt-get install libasound2-dev
 
 # Get dependencies
-go mod init osc-midi-bridge
-go get github.com/hypebeast/go-osc/osc
-go get gitlab.com/gomidi/midi/v2
-go get gitlab.com/gomidi/midi/v2/drivers/rtmididrv
-go get github.com/GeoffreyPlitt/debuggo
+go mod download
 
 # Build
 go build -o osc-midi-bridge
