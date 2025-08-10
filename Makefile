@@ -37,6 +37,10 @@ mod-tidy: docker-build
 fmt: docker-build
 	docker run --rm -v $(PWD):/app $(DOCKER_IMAGE) go fmt ./...
 
+.PHONY: vet
+vet: docker-build
+	docker run --rm -v $(PWD):/app -v ~/go/pkg/mod:/go/pkg/mod $(DOCKER_IMAGE) go vet ./...
+
 .PHONY: clean
 clean:
 	docker stop $(CONTAINER) 2>/dev/null || true

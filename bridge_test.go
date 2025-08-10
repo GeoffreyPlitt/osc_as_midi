@@ -2,10 +2,6 @@ package main
 
 import (
 	"testing"
-
-	"github.com/hypebeast/go-osc/osc"
-	"gitlab.com/gomidi/midi/v2"
-	"gitlab.com/gomidi/midi/v2/drivers/rtmididrv"
 )
 
 func TestBridgeStart(t *testing.T) {
@@ -22,7 +18,7 @@ func TestBridgeStart(t *testing.T) {
 
 func TestBridgeCleanup(t *testing.T) {
 	bridge := &Bridge{}
-	
+
 	// Should not panic even with nil fields
 	bridge.Cleanup()
 }
@@ -36,7 +32,7 @@ func TestExtractChannel(t *testing.T) {
 		{"/midi/5/note_off", 5},
 		{"/midi/15/cc", 15},
 		{"/midi/16/note_on", 0}, // Should wrap or handle invalid channel
-		{"/invalid/path", 0},     // Should handle gracefully
+		{"/invalid/path", 0},    // Should handle gracefully
 	}
 
 	bridge := &Bridge{}

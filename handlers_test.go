@@ -12,14 +12,14 @@ func TestHandleNoteOn(t *testing.T) {
 	}
 
 	tests := []struct {
-		name     string
-		message  *osc.Message
+		name      string
+		message   *osc.Message
 		shouldLog bool
 	}{
 		{
 			name: "valid note on",
 			message: &osc.Message{
-				Address: "/midi/0/note_on",
+				Address:   "/midi/0/note_on",
 				Arguments: []interface{}{60, 127},
 			},
 			shouldLog: true,
@@ -27,7 +27,7 @@ func TestHandleNoteOn(t *testing.T) {
 		{
 			name: "missing velocity",
 			message: &osc.Message{
-				Address: "/midi/0/note_on",
+				Address:   "/midi/0/note_on",
 				Arguments: []interface{}{60},
 			},
 			shouldLog: false,
@@ -35,7 +35,7 @@ func TestHandleNoteOn(t *testing.T) {
 		{
 			name: "no arguments",
 			message: &osc.Message{
-				Address: "/midi/0/note_on",
+				Address:   "/midi/0/note_on",
 				Arguments: []interface{}{},
 			},
 			shouldLog: false,
@@ -62,14 +62,14 @@ func TestHandleNoteOff(t *testing.T) {
 		{
 			name: "valid note off",
 			message: &osc.Message{
-				Address: "/midi/0/note_off",
+				Address:   "/midi/0/note_off",
 				Arguments: []interface{}{60, 0},
 			},
 		},
 		{
 			name: "with velocity",
 			message: &osc.Message{
-				Address: "/midi/5/note_off",
+				Address:   "/midi/5/note_off",
 				Arguments: []interface{}{72, 64},
 			},
 		},
@@ -85,7 +85,7 @@ func TestHandleNoteOff(t *testing.T) {
 
 func TestSetupOSCHandlers(t *testing.T) {
 	bridge := &Bridge{}
-	
+
 	// Should not panic even without oscServer initialized
 	bridge.setupOSCHandlers()
 }
