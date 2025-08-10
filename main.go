@@ -19,7 +19,6 @@ func main() {
 		oscPort    = flag.Int("osc-port", 9000, "UDP port for OSC messages")
 		clientName = flag.String("client-name", "osc-midi-bridge", "JACK client name")
 		portName   = flag.String("port-name", "midi_out", "JACK MIDI output port name")
-		bufferSize = flag.Int("buffer-size", 64, "JACK buffer size in frames (64=1.3ms @ 48kHz)")
 		listPorts  = flag.Bool("list-ports", false, "List available MIDI ports and exit")
 	)
 
@@ -48,7 +47,6 @@ func main() {
 	fmt.Printf("  OSC Port: %d\n", *oscPort)
 	fmt.Printf("  JACK Client: %s\n", *clientName)
 	fmt.Printf("  MIDI Port: %s\n", *portName)
-	fmt.Printf("  Buffer Size: %d frames\n", *bufferSize)
 
 	if err := bridge.Start(); err != nil {
 		log.Fatal(err)

@@ -13,6 +13,20 @@ import (
 
 var debugHandlers = debuggo.Debug("handlers")
 
+func (b *Bridge) createMidiEvent(statusByte, channel, note, velocity uint8) *MidiEvent {
+	midiBytes := []byte{
+		byte(statusByte | (channel & 0x0F)),
+		byte(note & 0x7F),
+		byte(velocity & 0x7F),
+	}
+	return &MidiEvent{
+		midiData: &jack.MidiData{
+			Time:   0,
+			Buffer: midiBytes,
+		},
+	}
+}
+
 func (b *Bridge) handleNoteOn(msg *osc.Message) error {
 	if len(msg.Arguments) < 2 {
 		return errors.New("note_on requires at least 2 arguments: note and velocity")
@@ -23,19 +37,10 @@ func (b *Bridge) handleNoteOn(msg *osc.Message) error {
 	velocity := toUint8(msg.Arguments[1])
 
 	// Create MIDI note on message: 0x90 | channel, note, velocity
-	midiBytes := []byte{
-		byte(0x90 | (channel & 0x0F)),
-		byte(note & 0x7F),
-		byte(velocity & 0x7F),
-	}
+	event := b.createMidiEvent(0x90, channel, note, velocity)
 
 	select {
-	case b.eventQueue <- &MidiEvent{
-		midiData: &jack.MidiData{
-			Time:   0,
-			Buffer: midiBytes,
-		},
-	}:
+	case b.eventQueue <- event:
 		fmt.Printf("NOTE-ON ch:%d note:%d vel:%d\n", channel, note, velocity)
 	default:
 		return errors.New("MIDI queue full")
@@ -54,19 +59,10 @@ func (b *Bridge) handleNoteOff(msg *osc.Message) error {
 	velocity := toUint8(msg.Arguments[1])
 
 	// Create MIDI note off message: 0x80 | channel, note, velocity
-	midiBytes := []byte{
-		byte(0x80 | (channel & 0x0F)),
-		byte(note & 0x7F),
-		byte(velocity & 0x7F),
-	}
+	event := b.createMidiEvent(0x80, channel, note, velocity)
 
 	select {
-	case b.eventQueue <- &MidiEvent{
-		midiData: &jack.MidiData{
-			Time:   0,
-			Buffer: midiBytes,
-		},
-	}:
+	case b.eventQueue <- event:
 		fmt.Printf("NOTE-OFF ch:%d note:%d vel:%d\n", channel, note, velocity)
 	default:
 		return errors.New("MIDI queue full")

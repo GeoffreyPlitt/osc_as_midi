@@ -35,8 +35,7 @@ A Go program that:
 ./osc-midi-bridge \
   --osc-port 8000 \
   --client-name "MyController" \
-  --port-name "midi_out" \
-  --buffer-size 64
+  --port-name "midi_out"
 
 # List available MIDI ports
 ./osc-midi-bridge --list-ports
@@ -47,9 +46,10 @@ A Go program that:
 --osc-port      UDP port for OSC messages (default: 9000)
 --client-name   JACK client name (default: "osc-midi-bridge")
 --port-name     JACK MIDI output port name (default: "midi_out")
---buffer-size   JACK buffer size in frames (default: 64 = 1.3ms @ 48kHz)
 --list-ports    List available MIDI ports and exit
 ```
+
+**Note:** JACK buffer size is controlled externally via the `jackd` command (e.g., `jackd -p 64`).
 
 ## OSC Message Format
 
@@ -172,7 +172,7 @@ DEBUG=bridge,main ./osc-midi-bridge
 
 # Ultra-low latency (0.67ms @ 48kHz)
 jackd -d dummy -r 48000 -p 32 &
-./osc-midi-bridge --buffer-size 32
+./osc-midi-bridge
 
 # List available MIDI ports
 ./osc-midi-bridge --list-ports
