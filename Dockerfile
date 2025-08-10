@@ -5,6 +5,8 @@ RUN apt-get update && apt-get install -y \
     jackd2 \
     libjack-jackd2-dev \
     liblo-tools \
+    jack-tools \
+    bsdmainutils \
     && rm -rf /var/lib/apt/lists/*
 
 # Set JACK environment variable to prevent audio reservation issues
