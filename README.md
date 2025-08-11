@@ -12,16 +12,7 @@ A **bidirectional** Go program that:
 2. **OSC → MIDI**: Listens for OSC messages on configurable UDP port, and emits them as Note events from the virtual device.
 3. **MIDI → OSC**: Reads incoming MIDI messages sent to the virtual MIDI device, and emits them as OSC messages.
 5. **Emits MIDI/OSC events** Low latency (1-2ms)
-6. **Logs debug info** using debuggo
-7. **Gracefully cleans up** on shutdown
-
-## Technical Stack
-
-**Libraries Used:**
-- `github.com/hypebeast/go-osc/osc` - Pure Go OSC implementation
-- `github.com/xthexder/go-jack` - JACK Audio Connection Kit bindings
-- `github.com/GeoffreyPlitt/debuggo` - Debug logging (controlled via DEBUG env var)
-- System dependency: `jackd2` and `libjack-jackd2-dev` (for JACK)
+6. **Gracefully cleans up** on shutdown
 
 ## CLI Interface
 
@@ -65,4 +56,6 @@ Where `{channel}` is 0-15 for MIDI channels 1-16.
 
 ## Development
 
-The project uses Docker for cross-platform development, especially useful on macOS where JACK requires special setup. Run `make test` for unit tests and `make integration-test` for end-to-end validation. See CLAUDE.md for detailed development workflow.
+- **Docker**: Cross-platform development, especially useful on macOS where JACK requires special setup
+- **Testing**: Run `make test` for unit tests and `make integration-test` for end-to-end validation  
+- **Documentation**: See CLAUDE.md for detailed development workflow
