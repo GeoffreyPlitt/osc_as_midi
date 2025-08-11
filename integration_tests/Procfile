@@ -1,4 +1,5 @@
 jackd: ./start_jackd.sh
 bridge: ./start_bridge.sh
 mididump: ./start_mididump.sh
-osc_sender: ./send_osc_messages.sh
+oscdump: ./start_oscdump.sh
+note_sender: ./send_osc_messages.sh; sleep 2; ./send_midi_messages.sh
