@@ -1,4 +1,4 @@
-module osc-midi-bridge
+module github.com/GeoffreyPlitt/osc_as_midi
 
 go 1.22
 

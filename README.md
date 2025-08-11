@@ -1,5 +1,10 @@
 # Custom Go OSC-to-Virtual-MIDI Bridge
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/GeoffreyPlitt/osc_as_midi.svg)](https://pkg.go.dev/github.com/GeoffreyPlitt/osc_as_midi)
+[![Go Report Card](https://goreportcard.com/badge/github.com/GeoffreyPlitt/osc_as_midi)](https://goreportcard.com/report/github.com/GeoffreyPlitt/osc_as_midi)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![CI](https://github.com/GeoffreyPlitt/osc_as_midi/workflows/CI/badge.svg)](https://github.com/GeoffreyPlitt/osc_as_midi/actions)
+
 ## Architecture Overview
 
 A **bidirectional** Go program that:
