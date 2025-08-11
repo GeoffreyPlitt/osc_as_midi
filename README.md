@@ -56,6 +56,7 @@ Where `{channel}` is 0-15 for MIDI channels 1-16.
 
 ## Development
 
-- **Docker**: Cross-platform development, especially useful on macOS where JACK requires special setup
-- **Testing**: Run `make test` for unit tests and `make integration-test` for end-to-end validation  
+- **Build**: Run `make build` to compile the binary using Docker
+- **Testing**: Run `make test` for unit tests and `make integration-test` for end-to-end validation
+- **Docker**: Cross-platform development, especially useful on macOS where JACK requires special setup  
 - **Documentation**: See CLAUDE.md for detailed development workflow
