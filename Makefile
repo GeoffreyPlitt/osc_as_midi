@@ -7,7 +7,7 @@ docker-build:
 
 .PHONY: build
 build: docker-build
-	docker run --rm -v $(PWD):/app -v ~/go/pkg/mod:/go/pkg/mod $(DOCKER_IMAGE) go build -o osc-midi-bridge
+	docker run --rm -v $(PWD):/app -v ~/go/pkg/mod:/go/pkg/mod $(DOCKER_IMAGE) go build -buildvcs=false -o osc-midi-bridge
 
 .PHONY: test
 test: docker-build

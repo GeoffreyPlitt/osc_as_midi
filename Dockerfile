@@ -30,7 +30,7 @@ COPY . .
 # Build the application
 RUN if [ -f go.mod ]; then \
         go mod tidy && \
-        go build -o osc-midi-bridge; \
+        go build -buildvcs=false -o osc-midi-bridge; \
     fi
 
 # Default command (use DEBUG env var for debug output)
