@@ -7,7 +7,6 @@
 *.dll
 *.so
 *.dylib
-osc-midi-bridge
 
 # Test binary, built with `go test -c`
 *.test
@@ -31,3 +30,7 @@ go.work.sum
 # Editor/IDE
 # .idea/
 # .vscode/
+
+# Ours
+osc-midi-bridge
+integration_tests/midi_sender

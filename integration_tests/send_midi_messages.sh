@@ -6,20 +6,19 @@ sleep 3
 
 echo "Sending MIDI to bridge input..."
 set -x
-# Use jack_midiseq to send MIDI notes to bridge input
-# Format: jack_midiseq name total_duration [startindex note duration] ...
-# Sample rate is 48000, so 12000 samples = 0.25 seconds
-jack_midiseq midi_sender 48000 \
-    0 67 12000 \
-    24000 79 12000 &
-midiseq_pid=$!
 
-# Connect the sequencer output to our bridge input  
-sleep 1
+# Build our custom MIDI sender
+go build -o midi_sender midi_sender.go
+
+# Run our deterministic MIDI sender in background
+./midi_sender &
+midi_pid=$!
+
+# Wait for it to activate and create ports, then connect
+sleep 0.1
 jack_connect midi_sender:out osc-midi-bridge:midi_in
 
 # Wait for sequence to complete
-sleep 2
-kill $midiseq_pid 2>/dev/null || true
+wait $midi_pid
 
 echo "MIDI_TEST_COMPLETE"
