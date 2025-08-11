@@ -3,11 +3,10 @@
 ## Architecture Overview
 
 A **bidirectional** Go program that:
-1. **Creates virtual JACK MIDI ports** (input and output) using go-jack
-2. **OSC → MIDI**: Listens for OSC messages on configurable UDP port
-3. **MIDI → OSC**: Reads incoming MIDI events from JACK input port
-4. **Translates between OSC and MIDI** with flexible path patterns
-5. **Emits MIDI/OSC events** with ultra-low latency (1.33ms)
+1. **EMULATES a VIRTUAL Jack MIDI device** (input and output) using go-jack
+2. **OSC → MIDI**: Listens for OSC messages on configurable UDP port, and emits them as Note events from the virtual device.
+3. **MIDI → OSC**: Reads incoming MIDI messages sent to the virtual MIDI device, and emits them as OSC messages.
+5. **Emits MIDI/OSC events** Low latency (1-2ms)
 6. **Logs debug info** using debuggo
 7. **Gracefully cleans up** on shutdown
 
